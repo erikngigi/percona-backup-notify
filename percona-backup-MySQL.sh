@@ -22,8 +22,4 @@ send_message_telegram() {
 		-d "text=$message"
 }
 
-if send_message_telegram "Testing connection to telegram bot."; then
-	echo "Connected to Telegram bot @BackupNotifyBot successfully."
-else
-	echo "Failed to connect to Telegram bot @BackupNotifyBot."
-fi
+send_message_telegram "Testing connection to telegram bot."
