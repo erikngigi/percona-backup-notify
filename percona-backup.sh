@@ -20,7 +20,7 @@ send_message_telegram() {
 	curl -s -o /dev/null -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
 		-d "chat_id=$TELEGRAM_CHATID" \
 		-d "text=$message" \
-		-d "parse_mode=MarkdownV2"
+		-d "parse_mode=HTML"
 }
 
 # Function to get latest percona full directory
@@ -49,10 +49,11 @@ create_incr_backup() {
 		binlog_pos=$(grep "binlog_pos" "$info_file" | awk '{print $4}')
 		gtid=$(grep "GTID of the last change" "$info_file" | cut -d= -f2 | xargs)
 
-		message=$"*✅ Incremental backup completed*\n\
-        📂 Directory: \`${target_dir}\`\n\
-        📝 Binlog: \`${binlog_file}:${binlog_pos}\`\n\
-        🔑 GTID: \`${gtid}\`"
+		# Build multi-line HTML message
+		message="<b>✅ Incremental backup completed</b><br>\
+📂 <b>Directory:</b> <code>$target_dir</code><br>\
+📝 <b>Binlog:</b> <code>$binlog_file:$binlog_pos</code><br>\
+🔑 <b>GTID:</b> <code>$gtid</code>"
 	else
 		message="Incremental backup completed, but xtrabackup_info not found in $target_dir"
 	fi
