@@ -49,11 +49,10 @@ create_incr_backup() {
 		binlog_pos=$(grep "binlog_pos" "$info_file" | awk '{print $4}')
 		gtid=$(grep "GTID of the last change" "$info_file" | cut -d= -f2 | xargs)
 
-		# Build multi-line HTML message
-		message="<b>✅ Incremental backup completed</b><br>\
-📂 <b>Directory:</b> <code>$target_dir</code><br>\
-📝 <b>Binlog:</b> <code>$binlog_file:$binlog_pos</code><br>\
-🔑 <b>GTID:</b> <code>$gtid</code>"
+        message="GTID: $gtid"
+        message="Binlog File: $binlog_file"
+        message="Binlog Position: $binlog_pos"
+
 	else
 		message="Incremental backup completed, but xtrabackup_info not found in $target_dir"
 	fi
