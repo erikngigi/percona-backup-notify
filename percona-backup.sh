@@ -22,4 +22,20 @@ send_message_telegram() {
 		-d "text=$message"
 }
 
-send_message_telegram "Message sent successfully to the Telegram bot."
+# Function to get latest percona full directory
+get_last_full_backup() {
+	latest_backup=$(ls --all --reverse --sort=time $BACKUP | tail -n 1)
+	LAST_FULL_BACKUP="$latest_backup"
+}
+
+get_last_full_backup
+
+create_incr_backup() {
+	# Generate a timestamp for the backups and log files
+	timestamp=$(date +%Y%m%d-%H%M%S)
+
+	xtrabackup --login-path=backup_operator --backup --target-dir="$INCR_BACKUP/backup-$timestamp" \
+		--incremental-basedir="$BACKUP/$LAST_FULL_BACKUP"
+
+	send_message_telegram "Incremental backup completed."
+}
