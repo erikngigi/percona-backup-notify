@@ -17,7 +17,7 @@ INCR_BACKUP="$HOME/percona_backups/incremental_updates"
 send_message_telegram() {
 	local message="$1"
 
-	curl -s -X POST "https://api.telegram.com/bot$TELEGRAM_TOKEN/sendMessage" \
+	curl -s -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
 		-d "chat_id=$TELEGRAM_CHATID" \
 		-d "text=$message"
 }
