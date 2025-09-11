@@ -7,7 +7,7 @@ ENV_FILE="$(cd "$(dirname "$(realpath "${BASH_SOURCE[0]}")")" && pwd)/.env"
 # Load the environmental file
 set -o allexport
 source "$ENV_FILE"
-set +0 allexport
+set +o allexport
 
 # Percona directories
 BACKUP="$HOME/percona_backups/full_backups"
