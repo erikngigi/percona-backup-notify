@@ -22,7 +22,4 @@ send_message_telegram() {
 		-d "text=$message"
 }
 
-echo "$TELEGRAM_TOKEN"
-echo "$TELEGRAM_CHATID"
-
-# send_message_telegram "Testing connection to telegram bot."
+send_message_telegram "Connected."
