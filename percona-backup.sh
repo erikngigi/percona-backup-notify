@@ -39,3 +39,5 @@ create_incr_backup() {
 
 	send_message_telegram "Incremental backup completed."
 }
+
+create_incr_backup
