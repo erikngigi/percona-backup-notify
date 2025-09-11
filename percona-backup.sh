@@ -38,7 +38,7 @@ create_incr_backup() {
 	xtrabackup --login-path=backup_operator \
         --backup \
         --target-dir="$target_dir" \
-		--incremental-basedir="$BACKUP/$LAST_FULL_BACKUP" > /dev/null
+		--incremental-basedir="$BACKUP/$LAST_FULL_BACKUP" > /dev/null 2>&1
 
     # Extract info from xtrabackup_info
     info_file="$target_dir/xtrabackup_info"
@@ -48,7 +48,9 @@ create_incr_backup() {
         binlog_pos=$(grep "binlog_pos" "$info_file" | awk '{print $4}')
         gtid=$(grep "GTID of the last change" "$info_file" | cut -d= -f2 | xargs)
 
-        message="Incremental backup completed.\nDirectory: $target_dir\nBinlog: $binlog_file:$binlog_pos\nGTID: $gtid"
+        message="Binlog Postion: $binlog_pos"
+        message="Binlog File: $binlog_file"
+        message="GTID: $gtid"
     else
         message="Incremental backup completed, but xtrabackup_info not found in $target_dir"
     fi
