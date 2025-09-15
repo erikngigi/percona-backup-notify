@@ -9,163 +9,41 @@ set -o allexport
 source "$ENV_FILE"
 set +o allexport
 
-# send_message_telegram
-#
-# Sends a plain text message to a Telegram chat using the Telegram Bot API.
-#
-# Globals:
-#   TELEGRAM_TOKEN   - The API token of the Telegram bot.
-#   TELEGRAM_CHATID  - The target chat ID (user, group, or channel).
-#
-# Arguments:
-#   $1 - The message text to send.
-#
-# Outputs:
-#   None (suppresses curl output).
-#
-# Example:
-#   send_message_telegram "Backup completed successfully."
-#
-send_message_telegram() {
-	local message="$1"
+# Load the bootstrap script to log events
+source "$SCRIPT_DIR/modules/bootstrap.sh"
 
-	curl -s -o /dev/null -X POST "https://api.telegram.org/bot$TELEGRAM_TOKEN/sendMessage" \
-		-d "chat_id=$TELEGRAM_CHATID" \
-		-d "text=$message"
+# Load the telegram message bot
+source "$SCRIPT_DIR/modules/telegram.sh"
+
+# Load the full backup script
+source "$SCRIPT_DIR/modules/full_backup.sh"
+
+# Load the incremental backup script
+source "$SCRIPT_DIR/modules/incr_backup.sh"
+
+show_help() {
+	message "Usage: $0 [options]"
+	message "Options:"
+	message " --full-backup         Performs a full backup using Percona's XtraBackup"
+	message " --incr-backup         Performs a incremental backup using Percona's XtraBackup using latest backup"
 }
 
-# create_full_backup
-#
-# Creates a full Percona XtraBackup. Generates a timestamped directory
-# for the backup, runs the backup, parses the xtrabackup_info file for
-# completion time, and sends a Telegram notification with the result.
-#
-# Globals:
-#   FULL_BACKUP        - Root directory where full backups are stored.
-#   message            - Status message passed to Telegram notification.
-#
-# Arguments:
-#   None
-#
-# Outputs:
-#   None (backup files are written to disk; status is sent via Telegram).
-#
-# Side Effects:
-#   Creates a new subdirectory under $FULL_BACKUP with the current timestamp.
-#
-# Example:
-#   FULL_BACKUP=/var/backups/mysql/full
-#   create_full_backup
-#
-create_full_backup() {
-	# Generate a timestamp for the backups and log files
-	timestamp=$(date +%Y%m%d-%H%M%S)
-	target_dir="$HOME/$BACKUP_DIR/$FULL_BACKUP_DIR/$FULL_BACKUP_NAME_$timestamp"
+[ $# -eq 0 ] && show_help && exit 1
 
-	# Ensure the parent directories exist
-	if [[ ! -d "$HOME/$BACKUP_DIR/$FULL_BACKUP_DIR" ]]; then
-		mkdir -p "$HOME/$BACKUP_DIR/$FULL_BACKUP_DIR"
-	fi
-
-	xtrabackup --login-path="$MYSQL_BACKUP_LOGIN_PATH" \
-		--backup \
-		--target-dir="$target_dir" >/dev/null 2>&1
-
-	# Extract info from xtrabackup_info
-	info_file="$target_dir/xtrabackup_info"
-
-	if [[ -f "$info_file" ]]; then
-		created_on_date=$(grep "end_time" "$info_file" | awk '{print $3}')
-		created_on_time=$(grep "end_time" "$info_file" | awk '{print $4}')
-		message="Full Backup Completed: $created_on_date @ $created_on_time"
-	else
-		message="Full backup completed, but xtrabackup_info not found in $target_dir"
-	fi
-
-	send_message_telegram "$message"
+main() {
+	case "$1" in
+	--full-backup)
+		create_full_backup
+		;;
+	--incr-backup)
+		create_incr_backup
+		;;
+	*)
+		message "Invalid Option"
+		show_help
+		return 1
+		;;
+	esac
 }
 
-# get_last_full_backup
-#
-# Finds the most recent full backup directory inside the backup root path.
-# Uses `find` to list directories, sorts them by modification time, and
-# stores the latest one in the global variable LAST_FULL_BACKUP.
-#
-# Globals:
-#   BACKUP            - Root directory containing backup directories.
-#   LAST_FULL_BACKUP  - Set by this function to the most recent backup directory.
-#
-# Arguments:
-#   None
-#
-# Outputs:
-#   None (result is stored in LAST_FULL_BACKUP).
-#
-# Example:
-#   BACKUP=/var/backups/mysql
-#   get_last_full_backup
-#   echo "Latest backup: $LAST_FULL_BACKUP"
-#
-get_last_full_backup() {
-	LAST_FULL_BACKUP=$(find "$HOME/$BACKUP_DIR/$FULL_BACKUP_DIR" -maxdepth 1 -type d -printf "%T@ %p\n" | sort -n | tail -1 | awk '{print $2}')
-}
-
-# create_incr_backup
-#
-# Creates an incremental Percona XtraBackup based on the latest full backup.
-# Generates a timestamped directory for the incremental backup, runs the backup,
-# parses the xtrabackup_info file for completion time, and sends a Telegram
-# notification with the result.
-#
-# Globals:
-#   INCR_BACKUP        - Root directory where incremental backups are stored.
-#   LAST_FULL_BACKUP   - Path to the latest full backup (used as base).
-#   message            - Status message passed to Telegram notification.
-#
-# Arguments:
-#   None
-#
-# Outputs:
-#   None (backup files are written to disk; status is sent via Telegram).
-#
-# Side Effects:
-#   Creates a new subdirectory under $INCR_BACKUP with the current timestamp.
-#   Updates global variable 'message'.
-#
-# Example:
-#   LAST_FULL_BACKUP=/var/backups/mysql/full-20250915-010000
-#   INCR_BACKUP=/var/backups/mysql/incrementals
-#   create_incr_backup
-#
-create_incr_backup() {
-	# Generate a timestamp for the backups and log files
-	timestamp=$(date +%Y%m%d-%H%M%S)
-	target_dir="$HOME/$BACKUP_DIR/$INCR_BACKUP_DIR/$INCR_BACKUP_NAME_$timestamp"
-
-	# Ensure the parent directories exist
-	if [[ ! -d "$HOME/$BACKUP_DIR/$INCR_BACKUP_DIR" ]]; then
-		mkdir -p "$HOME/$BACKUP_DIR/$INCR_BACKUP_DIR"
-	fi
-
-	xtrabackup --login-path="$MYSQL_BACKUP_LOGIN_PATH" \
-		--backup \
-		--target-dir="$target_dir" \
-		--incremental-basedir="$LAST_FULL_BACKUP" >/dev/null 2>&1
-
-	# Extract info from xtrabackup_info
-	info_file="$target_dir/xtrabackup_info"
-
-	if [[ -f "$info_file" ]]; then
-		created_on_date=$(grep "end_time" "$info_file" | awk '{print $3}')
-		created_on_time=$(grep "end_time" "$info_file" | awk '{print $4}')
-		message="Incremental Backup Completed: $created_on_date @ $created_on_time"
-	else
-		message="Incremental backup completed, but xtrabackup_info not found in $target_dir"
-	fi
-
-	send_message_telegram "$message"
-}
-
-# get_last_full_backup
-# create_incr_backup
-create_full_backup
+main "$@"
