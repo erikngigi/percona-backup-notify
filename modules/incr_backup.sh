@@ -72,7 +72,7 @@ create_incr_backup() {
 	# Check if backup was created and measure size
 	if [[ -d "$target_dir" ]]; then
 		backup_size=$(du -sh "$target_dir" | awk '{print $1}')
-		message="Incremental Compressed Backup Completed: $timestamp | Size: $backup_size"
+		message="Incremental Compressed Completed: $timestamp | Size: $backup_size"
 	else
 		message="Incremental Backup Failed: $timestamp (target directory missing)"
 	fi
