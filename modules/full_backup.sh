@@ -37,16 +37,7 @@ create_full_backup() {
 		--backup \
 		--target-dir="$target_dir" >/dev/null 2>&1
 
-	# Extract info from xtrabackup_info
-	info_file="$target_dir/xtrabackup_info"
-
-	if [[ -f "$info_file" ]]; then
-		created_on_date=$(grep "end_time" "$info_file" | awk '{print $3}')
-		created_on_time=$(grep "end_time" "$info_file" | awk '{print $4}')
-		message="Full Backup Completed: $created_on_date @ $created_on_time"
-	else
-		message="Full backup completed, but xtrabackup_info not found in $target_dir"
-	fi
+	message="Full Compressed Backup Completed: $timestamp"
 
 	send_message_telegram "$message"
 }
