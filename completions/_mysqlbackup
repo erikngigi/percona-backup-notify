@@ -1,0 +1,7 @@
+#compdef mysqlbackup
+
+local -a subcmds=(
+        "--full-backup:Performs a full backup using Percona's XtraBackup"
+        "--incr-backup:Performs a incremental backup using Percona's XtraBackup using latest backup"
+)
+_describe 'mysqlbackup' subcmd
