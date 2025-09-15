@@ -113,4 +113,5 @@ create_incr_backup() {
 	send_message_telegram "$message"
 }
 
+get_last_full_backup
 create_incr_backup
