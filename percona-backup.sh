@@ -104,7 +104,7 @@ create_incr_backup() {
 	info_file="$target_dir/xtrabackup_info"
 
 	if [[ -f "$info_file" ]]; then
-		created_on=$(grep "end_time" "$info_file" | awk '{print $3}')
+		created_on=$(grep "end_time" "$info_file" | awk '{print $3, $4}')
 		message="Incremental Backup Completed: $created_on"
 	else
 		message="Incremental backup completed, but xtrabackup_info not found in $target_dir"
