@@ -54,7 +54,7 @@ get_last_full_backup() {
 #
 create_incr_backup() {
 	# Generate a timestamp for the backups and log files
-	timestamp=$(date +%Y%m%d-%H%M%S)
+	timestamp=$(date +%Y-%m-%d-%H:%M:%S)
 	target_dir="$HOME/$BACKUP_DIR/$INCR_BACKUP_DIR/$INCR_BACKUP_NAME-$timestamp"
 
 	# Ensure the parent directories exist

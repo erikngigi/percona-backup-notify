@@ -25,7 +25,7 @@
 #
 create_full_backup() {
 	# Generate a timestamp for the backups and log files
-	timestamp=$(date +%Y%m%d-%H%M%S)
+	timestamp=$(date +%Y-%m-%d-%H:%M:%S)
 	target_dir="$HOME/$BACKUP_DIR/$FULL_BACKUP_DIR/$FULL_BACKUP_NAME-$timestamp"
 
 	# Ensure the parent directories exist

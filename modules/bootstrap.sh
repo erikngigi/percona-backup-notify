@@ -8,7 +8,7 @@ if [[ ! -d "$LOGDIR" ]]; then
 fi
 
 # Use timestamped log file names: YYYY-MM-DD_HH-MM-SS.log
-timestamp=$(date +%Y%m%d-%H%M%S)
+timestamp=$(date +%Y-%m-%d-%H:%M:%S)
 LOGFILE="$LOGDIR/backup_$timestamp.log"
 
 # Backup stdout & stderr so we can still talk to the terminal
