@@ -20,6 +20,6 @@ exec 1>"$LOGFILE" 2>&1
 # Enable command tracing and exit on error
 set -ex
 
-message() {
+info() {
 	echo "$*" >&3
 }

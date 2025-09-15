@@ -22,10 +22,10 @@ source "$SCRIPT_DIR/modules/full_backup.sh"
 source "$SCRIPT_DIR/modules/incr_backup.sh"
 
 show_help() {
-	message "Usage: $0 [options]"
-	message "Options:"
-	message " --full-backup         Performs a full backup using Percona's XtraBackup"
-	message " --incr-backup         Performs a incremental backup using Percona's XtraBackup using latest backup"
+	info "Usage: $0 [options]"
+	info "Options:"
+	info " --full-backup         Performs a full backup using Percona's XtraBackup"
+	info " --incr-backup         Performs a incremental backup using Percona's XtraBackup using latest backup"
 }
 
 [ $# -eq 0 ] && show_help && exit 1
