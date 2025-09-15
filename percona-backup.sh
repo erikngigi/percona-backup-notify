@@ -21,6 +21,9 @@ source "$SCRIPT_DIR/modules/full_backup.sh"
 # Load the incremental backup script
 source "$SCRIPT_DIR/modules/incr_backup.sh"
 
+# Load the disk space
+source "$SCRIPT_DIR/modules/check_space.sh"
+
 show_help() {
 	info "Usage: $0 [options]"
 	info "Options:"

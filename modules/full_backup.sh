@@ -33,11 +33,18 @@ create_full_backup() {
 		mkdir -p "$HOME/$BACKUP_DIR/$FULL_BACKUP_DIR"
 	fi
 
+	# Run full backup
 	xtrabackup --login-path="$MYSQL_BACKUP_LOGIN_PATH" \
 		--backup \
 		--target-dir="$target_dir" >/dev/null 2>&1
 
-	message="Full Compressed Backup Completed: $timestamp"
+	# Check if backup was created and measure size
+	if [[ -d "$target_dir" ]]; then
+		backup_size=$(du -sh "$target_dir" | awk '{print $1}')
+		message="Full Compressed Backup Completed: $timestamp | Size: $backup_size" 
+	else
+        message="Full Backup Failed: $timestamp (target directory missing)"
+	fi
 
 	send_message_telegram "$message"
 }
