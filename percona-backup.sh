@@ -45,14 +45,8 @@ create_incr_backup() {
 	info_file="$target_dir/xtrabackup_info"
 
 	if [[ -f "$info_file" ]]; then
-		binlog_file=$(grep "binlog_pos" "$info_file" | awk '{print $3}')
-		binlog_pos=$(grep "binlog_pos" "$info_file" | awk '{print $4}')
-		gtid=$(grep "GTID of the last change" "$info_file" | cut -d= -f2 | xargs)
-
-        message="GTID: $gtid"
-        message="Binlog File: $binlog_file"
-        message="Binlog Position: $binlog_pos"
-
+		created_on=$(grep "end_time" "$info_file" | awk '{print $3}')
+        message="Incremental Backup Completed: $created_on"
 	else
 		message="Incremental backup completed, but xtrabackup_info not found in $target_dir"
 	fi
